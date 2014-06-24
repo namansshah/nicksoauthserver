@@ -42,10 +42,10 @@ namespace NicksOAuthServer.Providers
             //Uncomment this to accept a post parameter called "pin"
             //IFormCollection form = await context.Request.ReadFormAsync();
             //string submittedPin = form["PIN"];
-
-            if(context.Token != null){
+            
+            if(!String.IsNullOrEmpty(context.Token)){
                 Guid refreshToken = Guid.Parse(context.Token);
-                if(refreshToken!=null){
+                if(refreshToken != null){
                     ApplicationDbContext dbContext = context.OwinContext.Get<ApplicationDbContext>();
 
                     OAuthSession oauthSession = dbContext.OAuthSessions.SingleOrDefault(oas => oas.RefreshToken == refreshToken);

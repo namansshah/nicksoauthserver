@@ -22,7 +22,7 @@ namespace NicksOAuthServer.Providers
             ApplicationDbContext dbContext = context.OwinContext.Get<ApplicationDbContext>();
             ApplicationUserManager userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
             
-            if(context.Ticket.Identity != null)
+            if(context.Ticket!= null && context.Ticket.Identity != null)
             {
                 Claim oauthSessionId = context.Ticket.Identity.Claims.First(c => c.Type == OAuthSessionClaimKey);
                 if (oauthSessionId != null)

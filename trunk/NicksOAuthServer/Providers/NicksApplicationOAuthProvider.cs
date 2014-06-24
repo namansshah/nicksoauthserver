@@ -101,10 +101,11 @@ namespace NicksOAuthServer.Providers
             //Try to get the client id and secret from Basic Auth Header
             if(context.TryGetBasicCredentials(out clientId, out clientSecret))
             {
+                
                 ApplicationUserManager userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
                 ApplicationDbContext dbContext = context.OwinContext.Get<ApplicationDbContext>();
                 
-                if(clientId != null){
+                if(!String.IsNullOrEmpty(clientId)){
                     OAuthClient oauthClient = await dbContext.OAuthClients.FirstOrDefaultAsync(oac => oac.ClientId.ToString() == clientId);
                     if (oauthClient != null && oauthClient.Enabled && userManager.PasswordHasher.VerifyHashedPassword(oauthClient.ClientSecretHash, clientSecret)==PasswordVerificationResult.Success)
                     {
