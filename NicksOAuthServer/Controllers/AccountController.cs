@@ -85,14 +85,14 @@ namespace NicksOAuthServer.Controllers
                     OAuthClient oauthClient = DbContext.OAuthClients.FirstOrDefault(oac => oac.ClientId.ToString() == clientId);
                     if (oauthClient != null && oauthClient.Enabled && UserManager.PasswordHasher.VerifyHashedPassword(oauthClient.ClientSecretHash, clientSecret) == PasswordVerificationResult.Success)
                     {
-                        if (token != null)
+                        if (!String.IsNullOrEmpty(token))
                         {
                             AuthenticationTicket ticket = Startup.OAuthOptions.AccessTokenFormat.Unprotect(token);
                             
                             if (ticket != null && ticket.Identity != null)
                             {
                                 string username = ticket.Identity.GetUserName();
-                                if(username!=null){
+                                if(!String.IsNullOrEmpty(username)){
                                     ApplicationUser user = await UserManager.FindByNameAsync(username);
                                     if (user != null && user.OrganizationId == oauthClient.OrganizationId)
                                     {
