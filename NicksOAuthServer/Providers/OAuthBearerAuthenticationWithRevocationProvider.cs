@@ -32,6 +32,7 @@ namespace NicksOAuthServer.Providers
                     if (oauthSession != null)
                     {
                         validated = true;
+                        context.Validated();
                     }
                 }
             }
