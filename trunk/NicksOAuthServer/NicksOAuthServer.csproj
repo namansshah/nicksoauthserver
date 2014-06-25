@@ -230,6 +230,7 @@
     <Compile Include="Models\AccountBindingModels.cs" />
     <Compile Include="Models\AccountViewModels.cs" />
     <Compile Include="Models\IdentityModels.cs" />
+    <Compile Include="Models\NicksOAuthConstants.cs" />
     <Compile Include="Models\OAuthClient.cs" />
     <Compile Include="Models\OAuthSession.cs" />
     <Compile Include="Models\Organization.cs" />
@@ -238,6 +239,7 @@
     <Compile Include="Providers\NicksRefreshTokenProvider.cs" />
     <Compile Include="Providers\OAuthBearerAuthenticationWithRevocationProvider.cs" />
     <Compile Include="Providers\OAuthGrant.cs" />
+    <Compile Include="Providers\OAuthScopeAuthorizationFilterAttribute.cs" />
     <Compile Include="Results\ChallengeResult.cs" />
     <Compile Include="Startup.cs" />
   </ItemGroup>

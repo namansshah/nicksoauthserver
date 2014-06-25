@@ -49,13 +49,14 @@ namespace NicksOAuthServer.Providers
                     //ClaimsIdentity cookiesIdentity = await user.GenerateUserIdentityAsync(userManager,CookieAuthenticationDefaults.AuthenticationType);
                     Guid oauthSessionValue=Guid.NewGuid();
                     oAuthIdentity.AddClaim(new Claim(OAuthBearerAuthenticationWithRevocationProvider.OAuthSessionClaimKey, oauthSessionValue.ToString()));
-                    
+                    string[] scopes = {NicksOAuthConstants.ValuesReadScope};
+                    oAuthIdentity.AddClaim(new Claim(NicksOAuthConstants.ScopeClaimType, String.Join(" ", scopes)));
                     ApplicationDbContext dbContext = context.OwinContext.Get<ApplicationDbContext>();
                     var oauthSessions = dbContext.OAuthSessions.Where(oas => oas.UserId.ToString() == user.Id && oas.ClientId == oauthClient.Id);
                     foreach(OAuthSession oauthSession in oauthSessions){
                         dbContext.OAuthSessions.Remove(oauthSession);
                     }
-
+                    
                     dbContext.OAuthSessions.Add(new OAuthSession
                     {
                         ClientId = oauthClient.Id,                        
@@ -63,14 +64,15 @@ namespace NicksOAuthServer.Providers
                         UserId = user.Id,
                         Id = oauthSessionValue
                     });
-                    dbContext.SaveChanges();
-
+                    dbContext.SaveChanges();                    
                     AuthenticationProperties properties = CreateProperties(user.UserName);
+                    properties.Dictionary.Add("scope", String.Join(" ", scopes));
                     AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, properties);                    
-                    context.Validated(oAuthIdentity);
+                    //context.Validated(oAuthIdentity);
+                    context.Validated(ticket);
                     context.Request.Context.Authentication.SignIn(oAuthIdentity);
                     context.OwinContext.Set<ApplicationUser>(OwinUserKey, user);
-                    validated = true;
+                    validated = true;                    
                 }
             }
 
