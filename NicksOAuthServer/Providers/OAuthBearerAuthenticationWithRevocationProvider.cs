@@ -16,7 +16,7 @@ namespace NicksOAuthServer.Providers
 
         //Validates Identity if the framework was able to populate the user's identity from the Access Token AND the sessions table indicate that the user has not logged out
         public override Task ValidateIdentity(OAuthValidateIdentityContext context)
-        {
+        {            
             bool validated = false;
             base.ValidateIdentity(context);
             ApplicationDbContext dbContext = context.OwinContext.Get<ApplicationDbContext>();
