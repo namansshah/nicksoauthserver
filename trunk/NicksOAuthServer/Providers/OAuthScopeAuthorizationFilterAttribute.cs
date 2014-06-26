@@ -36,7 +36,9 @@ namespace NicksOAuthServer.Providers
                     }
                 }
             }
-            actionContext.Response = new HttpResponseMessage(HttpStatusCode.Forbidden);
+            //actionContext.Response = new HttpResponseMessage(HttpStatusCode.Forbidden);
+            actionContext.Response = actionContext.Request.CreateResponse(HttpStatusCode.Forbidden);
+            //throw new HttpResponseException(HttpStatusCode.Forbidden);
         }                
     }
 }
