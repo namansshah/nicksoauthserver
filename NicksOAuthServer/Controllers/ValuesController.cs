@@ -32,7 +32,7 @@ namespace NicksOAuthServer.Controllers
             return NotFound();
         }
 
-        [OAuthScopeAuthorizationFilter(NicksOAuthConstants.ValuesModifyScope)]
+        [OAuthScopeAuthorizationFilter(NicksOAuthConstants.ValuesModifyScope)]        
         // PUT api/values/5
         public IHttpActionResult Put(int id, PutValueModel model)
         {
@@ -54,14 +54,21 @@ namespace NicksOAuthServer.Controllers
             }
             else {
                 return StatusCode(HttpStatusCode.NoContent);
-            }            
+            }
         }
-
-        public class PutValueModel
+        [OAuthScopeAuthorizationFilter(NicksOAuthConstants.ValuesAvailableScope)]        
+        [Route("api/values/ping")]
+        // GET api/values/ping
+        public IHttpActionResult GetPing()
         {
-            [Required]
-            [Display(Name = "The Value")]
-            public string value { get; set; }
+            return Ok();
         }
+    }
+
+    public class PutValueModel
+    {
+        [Required]
+        [Display(Name = "The Value")]
+        public string value { get; set; }
     }
 }
