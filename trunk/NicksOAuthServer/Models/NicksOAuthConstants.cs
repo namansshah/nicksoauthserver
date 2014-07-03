@@ -14,6 +14,7 @@ namespace NicksOAuthServer.Models
 
         public const string ValuesReadScope = "values-read";
         public const string ValuesModifyScope = "values-modify";
+        public const string ValuesAvailableScope = "values-available";
 
         public const string UserRole = "User";
         public const string ClientRole = "Client";

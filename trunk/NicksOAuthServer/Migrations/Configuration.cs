@@ -89,6 +89,18 @@ namespace NicksOAuthServer.Migrations
                 OrganizationId=pricechopper.Id
             });
 
+            context.OAuthClients.AddOrUpdate(c => c.Name, new OAuthClient
+            {
+                Name = "Hy-vee Mobile Client Credentials",
+                AllowedGrant = Providers.OAuthGrant.ClientCredentials,
+                ClientId = Guid.NewGuid(),
+                CreatedOn = DateTimeOffset.Now,
+                Description = "Client Credentials Grant for Hy-vee",
+                Enabled = true,
+                ClientSecretHash = userManager.PasswordHasher.HashPassword("Start123!"),
+                OrganizationId = hyvee.Id
+            });
+
             context.SaveChanges();            
             
             ApplicationUser foundUser = userManager.FindByName("firsthyveeuser");
@@ -111,6 +123,8 @@ namespace NicksOAuthServer.Migrations
                 ApplicationUser user = new ApplicationUser() { UserName = "firsthenhouseuser", Email = "nick.coblentz@gmail.com", FirstName = "First", LastName = "Hen House User", OrganizationId = henhouse.Id, LockoutEnabled = true, PINHash = userManager.PasswordHasher.HashPassword("1234") };
                 IdentityResult result = userManager.Create(user, "Start123!");
             }
+
+            
         }
     }
 }

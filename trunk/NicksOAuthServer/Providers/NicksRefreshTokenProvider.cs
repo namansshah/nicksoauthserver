@@ -23,17 +23,19 @@ namespace NicksOAuthServer.Providers
         
 
         public async Task CreateAsync(AuthenticationTokenCreateContext context)
-        {            
-            Guid refreshToken = Guid.NewGuid();
-            
+        {
+            Guid refreshToken = Guid.NewGuid();            
             ApplicationDbContext dbContext = context.OwinContext.Get<ApplicationDbContext>();
             ApplicationUser user = context.OwinContext.Get<ApplicationUser>(NicksApplicationOAuthProvider.OwinUserKey);
             OAuthClient oauthClient = context.OwinContext.Get<OAuthClient>(NicksApplicationOAuthProvider.OwinClientKey);
-            OAuthSession oauthSession = dbContext.OAuthSessions.SingleOrDefault(oas => oas.UserId == user.Id && oas.ClientId == oauthClient.Id);
-            oauthSession.RefreshToken = refreshToken;
-            oauthSession.RefreshTokenEnabled = true;
-            await dbContext.SaveChangesAsync();            
-            context.SetToken(refreshToken.ToString());
+            if (oauthClient != null && user != null)
+            {
+                OAuthSession oauthSession = dbContext.OAuthSessions.SingleOrDefault(oas => oas.UserId == user.Id && oas.ClientId == oauthClient.Id);
+                oauthSession.RefreshToken = refreshToken;
+                oauthSession.RefreshTokenEnabled = true;
+                await dbContext.SaveChangesAsync();
+                context.SetToken(refreshToken.ToString());                
+            }
         }
 
         public async Task ReceiveAsync(AuthenticationTokenReceiveContext context)

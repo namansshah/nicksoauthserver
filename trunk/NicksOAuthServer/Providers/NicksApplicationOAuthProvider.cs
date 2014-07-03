@@ -11,6 +11,7 @@ using Microsoft.Owin.Security;
 using Microsoft.Owin.Security.Cookies;
 using Microsoft.Owin.Security.OAuth;
 using NicksOAuthServer.Models;
+using System.Security.Principal;
 
 namespace NicksOAuthServer.Providers
 {
@@ -67,7 +68,7 @@ namespace NicksOAuthServer.Providers
                     dbContext.SaveChanges();                    
                     AuthenticationProperties properties = CreateProperties(user.UserName);
                     properties.Dictionary.Add("scope", String.Join(" ", scopes));
-                    AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, properties);                    
+                    AuthenticationTicket ticket = new AuthenticationTicket(oAuthIdentity, properties);
                     //context.Validated(oAuthIdentity);
                     context.Validated(ticket);
                     context.Request.Context.Authentication.SignIn(oAuthIdentity);
@@ -80,11 +81,51 @@ namespace NicksOAuthServer.Providers
             {
                 context.SetError("Authentication Failed");
                 context.Rejected();
-            }            
+            }
+        }
+
+        //Todo: this method, seed method
+        public override Task GrantClientCredentials(OAuthGrantClientCredentialsContext context)
+        {
+            bool validated = false;
+
+            OAuthClient oauthClient = context.OwinContext.Get<OAuthClient>(OwinClientKey);
+            if (oauthClient != null && oauthClient.AllowedGrant == OAuthGrant.ClientCredentials)
+            {
+                ClaimsIdentity identity = new ClaimsIdentity(new GenericIdentity(context.ClientId, OAuthDefaults.AuthenticationType));
+                
+                string[] scopes = { NicksOAuthConstants.ValuesAvailableScope };
+                identity.AddClaim(new Claim(NicksOAuthConstants.ScopeClaimType, String.Join(" ", scopes)));
+
+                Guid oauthSessionValue=Guid.NewGuid();
+                identity.AddClaim(new Claim(OAuthBearerAuthenticationWithRevocationProvider.OAuthSessionClaimKey, oauthSessionValue.ToString()));
+                
+                identity.AddClaim(new Claim(OAuthBearerAuthenticationWithRevocationProvider.OAuthClientCredentialsGrantKey, "true"));
+                                
+                AuthenticationProperties properties = CreateProperties(context.ClientId);
+                properties.Dictionary.Add("scope", String.Join(" ", scopes));
+                context.Options.AccessTokenExpireTimeSpan = TimeSpan.FromMinutes(5); //Success!
+                //properties.ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(5); //Hmmm... this gets overwritten.
+                
+                AuthenticationTicket ticket = new AuthenticationTicket(identity, properties);                
+                //ticket.Properties.ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(5); //Hmmm... this gets overwritten.
+                
+                context.Validated(ticket);
+                //context.Ticket.Properties.ExpiresUtc = DateTimeOffset.UtcNow.AddMinutes(5); //Hmmm... this gets overwritten.
+                validated = true;
+            }
+
+            if(!validated)
+            {
+                context.SetError("Authentication Failed");
+                context.Rejected();
+            }
+
+            return Task.FromResult<object>(null);
         }
 
         public override Task TokenEndpoint(OAuthTokenEndpointContext context)
-        {
+        {            
             foreach (KeyValuePair<string, string> property in context.Properties.Dictionary)
             {
                 context.AdditionalResponseParameters.Add(property.Key, property.Value);

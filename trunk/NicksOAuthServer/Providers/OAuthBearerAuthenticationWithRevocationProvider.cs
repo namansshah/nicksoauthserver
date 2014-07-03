@@ -13,8 +13,8 @@ namespace NicksOAuthServer.Providers
     public class OAuthBearerAuthenticationWithRevocationProvider : OAuthBearerAuthenticationProvider
     {
         public static string OAuthSessionClaimKey = "OAuthSession";
-
-        //Validates Identity if the framework was able to populate the user's identity from the Access Token AND the sessions table indicate that the user has not logged out
+        public static string OAuthClientCredentialsGrantKey = "OAuthClientCredentialsGrant";
+        
         public override Task ValidateIdentity(OAuthValidateIdentityContext context)
         {            
             bool validated = false;
@@ -23,22 +23,33 @@ namespace NicksOAuthServer.Providers
             ApplicationUserManager userManager = context.OwinContext.GetUserManager<ApplicationUserManager>();
             
             if(context.Ticket!= null && context.Ticket.Identity != null)
-            {
-                Claim oauthSessionId = context.Ticket.Identity.Claims.First(c => c.Type == OAuthSessionClaimKey);
-                if (oauthSessionId != null)
+            {                                
+                if(context.Ticket.Identity.Claims.SingleOrDefault(c => c.Type == OAuthClientCredentialsGrantKey) != null)
                 {
-                    
-                    OAuthSession oauthSession = dbContext.OAuthSessions.SingleOrDefault(oas => oas.Id.ToString() == oauthSessionId.Value);
-                    if (oauthSession != null)
+                    Guid clientId = new Guid(context.Ticket.Identity.Name);
+                    if (dbContext.OAuthClients.SingleOrDefault(oac => oac.ClientId == clientId && oac.Enabled==true) != null)
                     {
                         validated = true;
                         context.Validated();
                     }
                 }
-            }
+                else {
+                    Claim oauthSessionId = context.Ticket.Identity.Claims.SingleOrDefault(c => c.Type == OAuthSessionClaimKey);
+                    if (oauthSessionId != null)
+                    {                    
+                        OAuthSession oauthSession = dbContext.OAuthSessions.SingleOrDefault(oas => oas.Id.ToString() == oauthSessionId.Value);
+                        if (oauthSession != null)
+                        {
+                            validated = true;
+                            context.Validated();
+                        }
+                    }
+                }
+            }            
             if (!validated)
             {
                 context.SetError("Invalid Token", "The Access Token is invalid.");
+                context.Rejected();
             }
             return Task.FromResult<object>(null);
         }
